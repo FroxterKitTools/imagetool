@@ -103,4 +103,13 @@ button.ghost { padding: 8px 12px; font-weight: 500; }
 .stagebar { display: none; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--muted); }
 .has-img .stagebar { display: flex; }
 .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---------- Remove background ---------- */
+.toggle { display: flex; justify-content: space-between; align-items: center; font-weight: 500; cursor: pointer; }
+.toggle input, .chk input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.rb { display: none; gap: 14px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.rb.on { display: grid; }
+.sw { display: flex; align-items: center; gap: 12px; }
+.swatch { width: 30px; height: 30px; flex: none; border-radius: 8px; border: 1px solid var(--line); background: transparent; }
+.chk { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); font-size: .88em; cursor: pointer; }
+.picking #before { cursor: crosshair; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

@@ -32,6 +32,33 @@
       </div>
 
       <div>
+        <label class="toggle" for="rbOn">Remove background <input type="checkbox" id="rbOn"></label>
+        <div class="rb" id="rb">
+          <div class="sw">
+            <span class="swatch" id="swatch"></span>
+            <span class="hint">Color to remove. Click the original image to pick a different one.</span>
+          </div>
+          <button class="ghost" id="autoPick" type="button">Auto-detect from corners</button>
+          <div>
+            <label class="lbl" for="tol">Tolerance</label>
+            <div class="row">
+              <input type="range" id="tol" min="0" max="100" value="20">
+              <input type="number" id="tolNum" min="0" max="100" value="20" aria-label="Tolerance">
+            </div>
+          </div>
+          <div>
+            <label class="lbl" for="soft">Edge softness</label>
+            <div class="row">
+              <input type="range" id="soft" min="0" max="40" value="8">
+              <input type="number" id="softNum" min="0" max="40" value="8" aria-label="Edge softness">
+            </div>
+          </div>
+          <label class="chk"><input type="checkbox" id="contig" checked> Only remove areas connected to the image edges, so matching colors inside the subject stay</label>
+          <div class="hint" id="rbStatus" role="status">Works best on plain, evenly lit backgrounds.</div>
+        </div>
+      </div>
+
+      <div>
         <span class="lbl">Background</span>
         <div class="seg" role="radiogroup" aria-label="Background mode">
           <input type="radio" name="bg" id="bgT" value="transparent" checked><label for="bgT">Transparent</label>
