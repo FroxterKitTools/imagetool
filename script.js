@@ -10,13 +10,17 @@
     outInfo: $('outInfo'), outInfo2: $('outInfo2'), srcInfo: $('srcInfo'),
     rbOn: $('rbOn'), rb: $('rb'), swatch: $('swatch'), autoPick: $('autoPick'),
     tol: $('tol'), tolNum: $('tolNum'), soft: $('soft'), softNum: $('softNum'),
-    contig: $('contig'), rbStatus: $('rbStatus')
+    contig: $('contig'), rbStatus: $('rbStatus'),
+    cropWrap: $('cropWrap'), cropBox: $('cropBox'), sel: $('sel'), cc: $('cc'),
+    cropBtn: $('cropBtn'), cropReset: $('cropReset'), cropRatio: $('cropRatio'),
+    cropApply: $('cropApply'), cropCancel: $('cropCancel'), cropInfo: $('cropInfo')
   };
   const ctx = el.after.getContext('2d');
 
   const state = {
     img: null, name: 'image', radius: 40, margin: 0, solid: false, color: '#ffffff',
-    rb: false, key: null, tol: 20, soft: 8, contig: true, src: null, cut: null
+    rb: false, key: null, tol: 20, soft: 8, contig: true, src: null, cut: null,
+    origUrl: null, cropActive: false, crop: null
   };
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -31,6 +35,7 @@
     img.onload = () => {
       state.img = img;
       state.src = null; state.cut = null; state.key = null; // reset background-removal cache
+      state.origUrl = url; exitCrop(); el.cropBtn.disabled = false; el.cropReset.hidden = true;
       if (state.rb) autoKey();
       state.name = file.name.replace(/\.[^.]+$/, '') || 'image';
       el.before.src = url; // keep URL alive for the preview
@@ -156,6 +161,136 @@
     const f = [...(e.clipboardData?.files || [])].find(f => f.type.startsWith('image/'));
     if (f) loadFile(f);
   });
+
+  /* ---------- Crop ---------- */
+  // The crop box lives in the original image's pixel coordinates; the overlay shows it as percentages.
+  let cropRatio = 0, drag = null; // cropRatio = width / height, or 0 for free
+
+  function paintCrop() {
+    const W = state.img.naturalWidth, H = state.img.naturalHeight, c = state.crop;
+    el.sel.style.left = (c.x / W * 100) + '%';
+    el.sel.style.top = (c.y / H * 100) + '%';
+    el.sel.style.width = (c.w / W * 100) + '%';
+    el.sel.style.height = (c.h / H * 100) + '%';
+    el.cropInfo.textContent = `${Math.round(c.w)} × ${Math.round(c.h)} px`;
+  }
+
+  // Shrink the current box to the chosen ratio, keeping its center.
+  function fitRatio() {
+    const c = state.crop;
+    let w = c.w, h = w / cropRatio;
+    if (h > c.h) { h = c.h; w = h * cropRatio; }
+    state.crop = { x: c.x + (c.w - w) / 2, y: c.y + (c.h - h) / 2, w, h };
+  }
+
+  function moveRect(s, dx, dy) {
+    const W = state.img.naturalWidth, H = state.img.naturalHeight;
+    return { x: clamp(s.x + dx, 0, W - s.w), y: clamp(s.y + dy, 0, H - s.h), w: s.w, h: s.h };
+  }
+
+  // hd = handle name such as 'nw', 'e', 's'. s = the box when the drag started.
+  function resizeRect(hd, s, dx, dy) {
+    const W = state.img.naturalWidth, H = state.img.naturalHeight, MIN = 16, r = cropRatio;
+    const hasW = hd.includes('w'), hasE = hd.includes('e'), hasN = hd.includes('n'), hasS = hd.includes('s');
+    let L = s.x, T = s.y, R = s.x + s.w, B = s.y + s.h;
+    if (hasW) L = clamp(L + dx, 0, R - MIN);
+    if (hasE) R = clamp(R + dx, L + MIN, W);
+    if (hasN) T = clamp(T + dy, 0, B - MIN);
+    if (hasS) B = clamp(B + dy, T + MIN, H);
+    if (!r) return { x: L, y: T, w: R - L, h: B - T };
+
+    // Locked ratio: size follows the dragged edge(s); the opposite edge (or the center) stays put.
+    const hasX = hasW || hasE, hasY = hasN || hasS;
+    let w = R - L, h = B - T;
+    if (hasX && hasY) { w = Math.max(w, h * r); h = w / r; }
+    else if (hasX) h = w / r;
+    else w = h * r;
+    const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
+    const maxW = hasW ? s.x + s.w : hasE ? W - s.x : 2 * Math.min(cx, W - cx);
+    const maxH = hasN ? s.y + s.h : hasS ? H - s.y : 2 * Math.min(cy, H - cy);
+    const k = Math.min(1, maxW / w, maxH / h);
+    w *= k; h *= k;
+    if (w < MIN || h < MIN) return s;
+    return {
+      x: hasW ? s.x + s.w - w : hasE ? s.x : cx - w / 2,
+      y: hasN ? s.y + s.h - h : hasS ? s.y : cy - h / 2,
+      w, h
+    };
+  }
+
+  function enterCrop() {
+    if (!state.img) return;
+    const W = state.img.naturalWidth, H = state.img.naturalHeight;
+    state.cropActive = true;
+    state.crop = { x: W * .1, y: H * .1, w: W * .8, h: H * .8 };
+    if (cropRatio) fitRatio();
+    el.cropBox.hidden = false; el.cc.classList.add('on'); el.cropBtn.hidden = true;
+    paintCrop();
+  }
+  function exitCrop() {
+    state.cropActive = false; drag = null;
+    el.cropBox.hidden = true; el.cc.classList.remove('on'); el.cropBtn.hidden = false;
+    el.cropInfo.textContent = '';
+  }
+
+  // Swap the working image (cropped version or the original) and refresh everything that depends on it.
+  function swapImage(url, cropped) {
+    const img = new Image();
+    img.onload = () => {
+      state.img = img; state.src = null; state.cut = null; state.key = null;
+      el.before.src = url;
+      el.srcInfo.textContent = `${img.naturalWidth} × ${img.naturalHeight}`;
+      exitCrop();
+      el.cropReset.hidden = !cropped;
+      if (state.rb) autoKey();
+      syncLimits(); render();
+    };
+    img.onerror = () => alert('Could not apply the crop. Try a smaller selection.');
+    img.src = url;
+  }
+
+  function applyCrop() {
+    const W = state.img.naturalWidth, H = state.img.naturalHeight, s = state.crop;
+    const x = clamp(Math.round(s.x), 0, W - 1), y = clamp(Math.round(s.y), 0, H - 1);
+    const w = clamp(Math.round(s.w), 1, W - x), h = clamp(Math.round(s.h), 1, H - y);
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(state.img, x, y, w, h, 0, 0, w, h);
+    c.toBlob(blob => {
+      if (!blob) { alert('Crop failed. The image may be too large for this browser.'); return; }
+      swapImage(URL.createObjectURL(blob), true);
+    }, 'image/png');
+  }
+
+  el.cropBtn.addEventListener('click', enterCrop);
+  el.cropApply.addEventListener('click', applyCrop);
+  el.cropCancel.addEventListener('click', exitCrop);
+  el.cropReset.addEventListener('click', () => { if (state.origUrl) swapImage(state.origUrl, false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.cropActive) exitCrop(); });
+  el.cropRatio.addEventListener('change', () => {
+    const v = el.cropRatio.value;
+    cropRatio = v === 'free' ? 0 : v.split(':').map(Number).reduce((a, b) => a / b);
+    if (cropRatio && state.crop) fitRatio();
+    if (state.cropActive) paintCrop();
+  });
+
+  // Drag the box to move it, or a handle to resize it (mouse, touch and pen).
+  el.cropBox.addEventListener('pointerdown', e => {
+    if (!state.cropActive) return;
+    const handle = e.target.dataset.h;
+    if (!handle && e.target !== el.sel) return;
+    e.preventDefault();
+    el.cropBox.setPointerCapture(e.pointerId);
+    const r = el.cropWrap.getBoundingClientRect();
+    drag = { mode: handle || 'move', x: e.clientX, y: e.clientY, s: { ...state.crop }, k: state.img.naturalWidth / r.width };
+  });
+  el.cropBox.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = (e.clientX - drag.x) * drag.k, dy = (e.clientY - drag.y) * drag.k;
+    state.crop = drag.mode === 'move' ? moveRect(drag.s, dx, dy) : resizeRect(drag.mode, drag.s, dx, dy);
+    paintCrop();
+  });
+  ['pointerup', 'pointercancel'].forEach(t => el.cropBox.addEventListener(t, () => { drag = null; }));
 
   /* ---------- Remove background (color-key, runs fully in the browser) ---------- */
   let rbTimer = 0;

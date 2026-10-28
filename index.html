@@ -15,6 +15,33 @@
     <!-- Controls -->
     <aside class="glass panel" aria-label="Settings">
       <div>
+        <span class="lbl">Crop <span class="hint" id="cropInfo"></span></span>
+        <div class="croprow">
+          <button class="ghost" id="cropBtn" type="button" disabled>Crop image</button>
+          <button class="ghost" id="cropReset" type="button" hidden>Reset crop</button>
+        </div>
+        <div class="cc" id="cc">
+          <div>
+            <label class="lbl" for="cropRatio">Aspect ratio</label>
+            <select id="cropRatio">
+              <option value="free">Free</option>
+              <option value="1:1">1:1 square</option>
+              <option value="4:3">4:3</option>
+              <option value="3:2">3:2</option>
+              <option value="16:9">16:9</option>
+              <option value="3:4">3:4 portrait</option>
+              <option value="9:16">9:16 portrait</option>
+            </select>
+          </div>
+          <div class="cropbtns">
+            <button class="primary" id="cropApply" type="button">Apply crop</button>
+            <button class="ghost" id="cropCancel" type="button">Cancel</button>
+          </div>
+          <div class="hint">Drag the box to move it, or drag a handle to resize. Press Esc to cancel.</div>
+        </div>
+      </div>
+
+      <div>
         <label class="lbl" for="radius">Radius <span class="hint">px</span></label>
         <div class="row">
           <input type="range" id="radius" min="0" max="200" value="40">
@@ -97,7 +124,18 @@
       <div class="previews">
         <section class="pane">
           <h2>Before <span id="srcInfo"></span></h2>
-          <div class="frame"><img id="before" alt="Original image"></div>
+          <div class="frame">
+            <div class="cropwrap" id="cropWrap">
+              <img id="before" alt="Original image">
+              <div class="cropbox" id="cropBox" hidden>
+                <div class="sel" id="sel">
+                  <i class="hd" data-h="nw"></i><i class="hd" data-h="n"></i><i class="hd" data-h="ne"></i>
+                  <i class="hd" data-h="e"></i><i class="hd" data-h="se"></i><i class="hd" data-h="s"></i>
+                  <i class="hd" data-h="sw"></i><i class="hd" data-h="w"></i>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
         <section class="pane">
           <h2>After <span id="outInfo2"></span></h2>
