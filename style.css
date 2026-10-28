@@ -1,14 +1,14 @@
 /* ---------- Tokens: obsidian + glass, one cool accent ---------- */
 :root {
   color-scheme: dark;
-  --bg: #0b0d10;
+  --bg: #0a0a0b;
   --glass: rgba(255,255,255,.045);
   --glass-strong: rgba(255,255,255,.08);
   --line: rgba(255,255,255,.1);
   --text: #e8ecf1;
   --muted: #8b94a0;
-  --accent: #7cc4ff;
-  --accent-ink: #06121c;
+  --accent: #e4e4e7;
+  --accent-ink: #111113;
   --danger: #ff8a8a;
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
@@ -19,8 +19,8 @@ html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 html, body { margin: 0; }
 body {
   background:
-    radial-gradient(900px 500px at 12% -10%, rgba(124,196,255,.12), transparent 60%),
-    radial-gradient(700px 500px at 100% 110%, rgba(150,120,255,.09), transparent 60%),
+    radial-gradient(900px 500px at 12% -10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(700px 500px at 100% 110%, rgba(255,255,255,.04), transparent 60%),
     var(--bg);
   background-attachment: fixed;
   color: var(--text);
@@ -80,7 +80,7 @@ button.ghost { padding: 8px 12px; font-weight: 500; }
   min-height: 340px; border: 1.5px dashed rgba(255,255,255,.2); border-radius: 14px;
   padding: 24px; cursor: pointer; transition: border-color .15s, background .15s;
 }
-.drop.over { border-color: var(--accent); background: rgba(124,196,255,.07); }
+.drop.over { border-color: var(--accent); background: rgba(255,255,255,.07); }
 .drop strong { font-size: 1.1rem; font-weight: 600; }
 .drop span { color: var(--muted); }
 .previews { display: none; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -93,10 +93,10 @@ button.ghost { padding: 8px 12px; font-weight: 500; }
   border-radius: 12px; border: 1px solid var(--line); padding: 12px;
   display: grid; place-items: center; min-height: 260px;
   /* checkerboard so transparency is visible */
-  background-color: #14171c;
+  background-color: #141415;
   background-image:
-    linear-gradient(45deg, #1c2026 25%, transparent 25%, transparent 75%, #1c2026 75%),
-    linear-gradient(45deg, #1c2026 25%, transparent 25%, transparent 75%, #1c2026 75%);
+    linear-gradient(45deg, #222224 25%, transparent 25%, transparent 75%, #222224 75%),
+    linear-gradient(45deg, #222224 25%, transparent 25%, transparent 75%, #222224 75%);
   background-size: 20px 20px; background-position: 0 0, 10px 10px;
 }
 .frame img, .frame canvas { max-width: 100%; max-height: 480px; width: auto; height: auto; display: block; }
@@ -133,4 +133,136 @@ button.ghost { padding: 8px 12px; font-weight: 500; }
 .croprow { display: flex; gap: 8px; flex-wrap: wrap; }
 select { width: 100%; background: rgba(0,0,0,.35); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; }
 select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* ====================================================================
+   Liquid glass theme: luminous drifting backdrop, frosted panels,
+   specular edge highlights, recessed "wells" for inputs.
+   ==================================================================== */
+:root {
+  --text: #f4f4f5;
+  --muted: rgba(236,236,240,.62);
+  --line: rgba(255,255,255,.2);
+  --glass-strong: rgba(255,255,255,.14);
+  --accent: #e4e4e7;
+  --accent-ink: #111113;
+  --danger: #ffb4b4;
+}
+body {
+  background: linear-gradient(160deg, #09090a 0%, #131314 50%, #1c1c1e 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+/* Color fields behind the glass give it something to refract */
+body::before {
+  content: ""; position: fixed; inset: -15%; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(38vmax 38vmax at 18% 22%, rgba(255,255,255,.16), transparent 62%),
+    radial-gradient(34vmax 34vmax at 82% 18%, rgba(170,170,178,.22), transparent 62%),
+    radial-gradient(40vmax 40vmax at 72% 82%, rgba(120,120,128,.3), transparent 62%),
+    radial-gradient(30vmax 30vmax at 12% 85%, rgba(215,215,220,.12), transparent 62%);
+  filter: blur(30px);
+  animation: drift 32s ease-in-out infinite alternate;
+}
+/* Fine frosted grain */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes drift { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(3%, 2%, 0) scale(1.08); } }
+
+.wrap { position: relative; max-width: 1200px; padding-top: 44px; }
+h1 { font-size: clamp(2rem, 4.6vw, 3rem); font-weight: 300; letter-spacing: -.035em; line-height: 1.05; margin-bottom: 12px; }
+.sub { color: var(--muted); font-weight: 300; font-size: 1.02rem; margin-bottom: 34px; }
+.app { gap: 22px; }
+
+/* Frosted glass surfaces */
+.glass {
+  position: relative; border-radius: 30px;
+  background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.07) 40%, rgba(255,255,255,.1) 100%);
+  border: 1px solid rgba(255,255,255,.26);
+  -webkit-backdrop-filter: blur(28px) saturate(185%); backdrop-filter: blur(28px) saturate(185%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(255,255,255,.1), inset 1px 0 0 rgba(255,255,255,.18),
+    0 40px 80px -30px rgba(0,0,0,.7), 0 8px 24px -8px rgba(0,0,0,.4);
+}
+/* Specular sheen across the top-left of each panel */
+.glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(90% 45% at 12% 0%, rgba(255,255,255,.28), transparent 60%), linear-gradient(180deg, transparent 70%, rgba(255,255,255,.06));
+}
+.glass > * { position: relative; z-index: 1; }
+.panel { padding: 26px; gap: 24px; }
+.stage { padding: 22px; }
+label.lbl { font-weight: 500; font-size: .92rem; letter-spacing: .01em; }
+.hint { font-weight: 300; }
+
+/* Recessed wells for inputs */
+input[type=number], input[type=text], select {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 14px; color: var(--text);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.08);
+}
+option { background: #1a1a1c; color: #fff; }
+.colorrow input[type=color] { border-radius: 14px; border-color: rgba(255,255,255,.3); }
+.swatch { border-radius: 10px; border-color: rgba(255,255,255,.4); }
+
+/* Liquid sliders */
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.2); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); }
+input[type=range]::-moz-range-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.2); box-shadow: inset 0 1px 3px rgba(0,0,0,.5); }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.8);
+  background: radial-gradient(circle at 30% 25%, #fff, rgba(255,255,255,.8) 55%, rgba(205,205,210,.75));
+  box-shadow: 0 3px 10px rgba(0,0,0,.5), inset 0 -2px 4px rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(255,255,255,.8);
+  background: radial-gradient(circle at 30% 25%, #fff, rgba(255,255,255,.8) 55%, rgba(205,205,210,.75));
+  box-shadow: 0 3px 10px rgba(0,0,0,.5);
+}
+
+/* Segmented control */
+.seg { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18); border-radius: 18px; box-shadow: inset 0 2px 8px rgba(0,0,0,.35); }
+.seg label { border-radius: 14px; }
+.seg input:checked + label {
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.14)); color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 6px 16px -4px rgba(0,0,0,.5);
+}
+
+/* Glass buttons; the primary one is a bright frosted pill */
+button {
+  border-radius: 16px; border: 1px solid rgba(255,255,255,.28); color: var(--text);
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 8px 20px -8px rgba(0,0,0,.55);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  transition: transform .15s, background .2s, box-shadow .2s;
+}
+button:hover:not(:disabled) { background: linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,.12)); transform: translateY(-1px); }
+button:active:not(:disabled) { transform: scale(.98); }
+button.primary {
+  color: #111113; border-color: rgba(255,255,255,.7);
+  background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(214,214,218,.84));
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 6px rgba(0,0,0,.25), 0 14px 34px -10px rgba(255,255,255,.28);
+}
+button.primary:hover:not(:disabled) { background: linear-gradient(180deg, #fff, rgba(232,232,236,.94)); }
+button.primary:disabled { opacity: .4; }
+
+/* Drop zone and preview frames */
+.drop { min-height: 380px; border: 1.5px dashed rgba(255,255,255,.38); border-radius: 24px; background: rgba(255,255,255,.04); }
+.drop.over { border-color: #fff; background: rgba(255,255,255,.14); box-shadow: inset 0 0 60px rgba(255,255,255,.16); }
+.drop strong { font-weight: 500; font-size: 1.25rem; letter-spacing: -.02em; }
+.pane h2 { font-weight: 400; }
+.frame {
+  border-radius: 22px; border: 1px solid rgba(255,255,255,.22); background-color: rgba(10,10,11,.55);
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,.07) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.07) 75%),
+    linear-gradient(45deg, rgba(255,255,255,.07) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.07) 75%);
+  box-shadow: inset 0 2px 14px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.15);
+}
+
+/* Browsers without backdrop-filter get a solid frosted fallback */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(30,30,32,.94); }
+}
+@media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
