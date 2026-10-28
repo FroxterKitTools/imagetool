@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Round Corners on Image</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Round corners on image</h1>
+  <p class="sub">Upload a PNG, JPG or WEBP, set the radius, and download a PNG with clean rounded corners. Everything runs in your browser; nothing is uploaded.</p>
+
+  <div class="app" id="app">
+    <!-- Controls -->
+    <aside class="glass panel" aria-label="Settings">
+      <div>
+        <label class="lbl" for="radius">Radius <span class="hint">px</span></label>
+        <div class="row">
+          <input type="range" id="radius" min="0" max="200" value="40">
+          <input type="number" id="radiusNum" min="0" value="40" aria-label="Radius in pixels">
+        </div>
+        <button class="ghost" id="maxRadius" type="button" style="margin-top:8px">Full circle / pill</button>
+      </div>
+
+      <div>
+        <label class="lbl" for="margin">Margin <span class="hint">px around image</span></label>
+        <div class="row">
+          <input type="range" id="margin" min="0" max="200" value="0">
+          <input type="number" id="marginNum" min="0" value="0" aria-label="Margin in pixels">
+        </div>
+      </div>
+
+      <div>
+        <span class="lbl">Background</span>
+        <div class="seg" role="radiogroup" aria-label="Background mode">
+          <input type="radio" name="bg" id="bgT" value="transparent" checked><label for="bgT">Transparent</label>
+          <input type="radio" name="bg" id="bgS" value="solid"><label for="bgS">Solid color</label>
+        </div>
+      </div>
+
+      <div>
+        <span class="lbl">Fill color <span class="hint">outside the corners</span></span>
+        <div class="colorrow off" id="colorRow">
+          <input type="color" id="color" value="#ffffff" aria-label="Pick a color">
+          <input type="text" id="hex" value="#ffffff" maxlength="7" spellcheck="false" aria-label="Hex color">
+        </div>
+        <div class="err" id="hexErr" role="status"></div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="download" type="button" disabled>Round &amp; download PNG</button>
+        <div class="hint" id="outInfo">Output size appears here.</div>
+      </div>
+    </aside>
+
+    <!-- Stage -->
+    <main class="glass stage" id="stage">
+      <div class="stagebar">
+        <span class="fname" id="fname"></span>
+        <button class="ghost" id="replace" type="button">Replace image</button>
+      </div>
+
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose an image or drop one here">
+        <strong>Drop an image here</strong>
+        <span>or click to browse. You can also paste from your clipboard.</span>
+        <span>PNG, JPG, WEBP</span>
+      </div>
+
+      <div class="previews">
+        <section class="pane">
+          <h2>Before <span id="srcInfo"></span></h2>
+          <div class="frame"><img id="before" alt="Original image"></div>
+        </section>
+        <section class="pane">
+          <h2>After <span id="outInfo2"></span></h2>
+          <div class="frame"><canvas id="after" aria-label="Rounded result preview"></canvas></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <input type="file" id="file" accept="image/png,image/jpeg,image/webp" hidden>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
